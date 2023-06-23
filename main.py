@@ -1,16 +1,34 @@
-# This is a sample Python script.
+from stable_baselines import PPO2
+from stable_baselines.common.vec_env import DummyVecEnv
+from stable_baselines.common.evaluation import evaluate_policy
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import gym
+from nfl_game_env import nfl_game
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+env = nfl_game()
+env = DummyVecEnv([lambda: env])
 
+# Instantiate the agent
+model = PPO2('MlpPolicy', env, verbose=1)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Train the agent
+model.learn(total_timesteps=100000)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Save the agent
+model.save("ppo_nfl")
+
+# Load the trained agent
+model = PPO2.load("ppo_nfl")
+
+# Evaluate the agent
+mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
+
+print(f"Mean reward: {mean_reward} +/- {std_reward}")
+
+# You can use the trained model to take actions in your environment as follows:
+obs = env.reset()
+for i in range(1000):
+    action, _ = model.predict(obs)
+    obs, reward, done, info = env.step(action)
+    if done:
+        obs = env.reset()
+

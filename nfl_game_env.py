@@ -11,16 +11,18 @@ class nfl_game(gym.Env):
         self.yard_line = 25
         self.half = 1
         self.distance_to_go = 10
-        self.score = np.array([0,0])
+        self.score_home = 0
+        self.score_away = 0
 
         self.action_space = spaces.Discrete(7)
-        self.observation_space = spaces.Dict({"yard_line": spaces.Discrete(100),
-                                              "distance_to_go": spaces.Discrete(100),
-                                              "down": spaces.Discrete(4),
-                                              "time_left_in_half": spaces.Discrete(1800),
-                                              "half": spaces.Discrete(2),
-                                              "score": spaces.Box(low=0, high=np.inf, shape=(2,), dtype=int),
-                                              })
+        self.observation_space = spaces.Box(low=0, high=1800, shape=(7,), dtype=int)
+        # self.observation_space = spaces.Dict({"yard_line": spaces.Discrete(100),
+        #                                       "distance_to_go": spaces.Discrete(100),
+        #                                       "down": spaces.Discrete(4),
+        #                                       "time_left_in_half": spaces.Discrete(1800),
+        #                                       "half": spaces.Discrete(2),
+        #                                       "score": spaces.Box(low=0, high=np.inf, shape=(2,), dtype=int),
+        #                                       })
 
     def reset(self):
         self.time = 1800
@@ -28,21 +30,23 @@ class nfl_game(gym.Env):
         self.yard_line = 25
         self.half = 1
         self.distance_to_go = 10
-        self.score = np.array([0,0])
+        self.score_home = 0
+        self.score_away = 0
+        start = [self.yard_line,self.distance_to_go,self.down,self.time,self.half,self.score_home,self.score_away]
 
-        start = {"yard_line": self.yard_line,
-                 "distance_to_go": self.distance_to_go,
-                 "down": self.down,
-                 "time_left_in_half": self.time,
-                 "half": self.half,
-                 "score": self.score,
-                 }
+        # start = {"yard_line": self.yard_line,
+        #          "distance_to_go": self.distance_to_go,
+        #          "down": self.down,
+        #          "time_left_in_half": self.time,
+        #          "half": self.half,
+        #          "score": self.score,
+        #          }
         return start
 
     def step(self, action):
 
         # run plays
-        if action == 0 or action == 1 or action == 2:
+        if action == 0 or action == 1:
             yards_gained, retain_ball = run(action)
             if retain_ball:
                 self.time -= 35
@@ -56,7 +60,7 @@ class nfl_game(gym.Env):
                     self.distance_to_go -= yards_gained
 
         # throw plays
-        if action == 3 or action == 4:
+        if action == 2 or action == 3 or action == 4:
             yards_gained, retain_ball = throw(action)
             if retain_ball:
                 self.yard_line = np.clip(yards_gained+self.yard_line,0,100)
@@ -90,13 +94,13 @@ class nfl_game(gym.Env):
             retain_ball = False
             self.time -= 2
             if kick_success:
-                self.score[0] += 3
+                self.score_home += 3
                 self.yard_line = 75
             else:
                 self.yard_line = min(np.clip(self.yard_line-7,0,100),80)
 
         if retain_ball and self.yard_line > 100:
-            self.score[0] += 7
+            self.score_home += 7
             retain_ball = False
 
         #check if loss of down due to 4 downs
@@ -105,11 +109,11 @@ class nfl_game(gym.Env):
 
         # check if possession is
         if not retain_ball:
-            start_yard_line, opp_change_in_score, time_taken = defensive_possesion(self.yard_line, self.time)
+            start_yard_line, opp_change_in_score, time_taken = defensive_possession(self.yard_line, self.time)
             self.yard_line = start_yard_line
             self.distance_to_go = 10
             self.down = 1
-            self.score[1] += opp_change_in_score
+            self.score_away += opp_change_in_score
             self.time -= time_taken
 
 
@@ -119,20 +123,21 @@ class nfl_game(gym.Env):
                 self.time = 1800
                 self.half = 2
             else:
-                if self.score[0] > self.score[1]:
+                if self.score_home > self.score_away:
                     return self.construct_obs(), 1, True, {}
-                elif self.score[0] == self.score[1]:
+                elif self.score_home == self.score_away:
                     return self.construct_obs(), -0.5, True, {}
                 else:
                     return self.construct_obs(), -1, True, {}
         return self.construct_obs(), 0, False, {}
 
     def construct_obs(self):
-        obs = {"yard_line": self.yard_line,
-               "distance_to_go": self.distance_to_go,
-               "down": self.down,
-               "time_left_in_half": self.time,
-               "half": self.half,
-               "score": self.score
-               }
+        # obs = {"yard_line": self.yard_line,
+        #        "distance_to_go": self.distance_to_go,
+        #        "down": self.down,
+        #        "time_left_in_half": self.time,
+        #        "half": self.half,
+        #        "score": self.score
+        #        }
+        obs = [self.yard_line,self.distance_to_go,self.down,self.time,self.half,self.score_home,self.score_away]
         return obs
