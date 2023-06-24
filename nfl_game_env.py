@@ -130,13 +130,12 @@ class nfl_game(gym.Env):
                 self.time = 1800
                 self.half = 2
             else:
-                print(self.score_home,self.score_away)
                 if self.score_home > self.score_away:
-                    return self.construct_obs(), 1, True, {}
+                    return self.construct_obs(), 10, True, {}
                 elif self.score_home == self.score_away:
-                    return self.construct_obs(), -0.5, True, {}
+                    return self.construct_obs(), -5, True, {}
                 else:
-                    return self.construct_obs(), -1, True, {}
+                    return self.construct_obs(), -10, True, {}
         return self.construct_obs(), reward, False, {}
 
     def construct_obs(self):
