@@ -1,4 +1,4 @@
-from stable_baselines import PPO2
+from stable_baselines import PPO2, DQN
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.common.evaluation import evaluate_policy
 
@@ -8,16 +8,18 @@ env = nfl_game()
 env = DummyVecEnv([lambda: env])
 
 # Instantiate the agent
-model = PPO2('MlpPolicy', env, verbose=1)
+model = DQN('MlpPolicy', env, verbose=1)
 
 # Train the agent
-model.learn(total_timesteps=100000)
+model.learn(total_timesteps=50000)
 
 # Save the agent
-model.save("ppo_nfl")
+model.save("dqn_nfl")
+
+del model
 
 # Load the trained agent
-model = PPO2.load("ppo_nfl")
+model = DQN.load("dqn_nfl")
 
 # Evaluate the agent
 mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
@@ -26,9 +28,14 @@ print(f"Mean reward: {mean_reward} +/- {std_reward}")
 
 # You can use the trained model to take actions in your environment as follows:
 obs = env.reset()
-for i in range(1000):
+print('obs = ', obs)
+for i in range(100):
     action, _ = model.predict(obs)
+    print('action = ', action)
     obs, reward, done, info = env.step(action)
+    print('obs = ', obs)
     if done:
-        obs = env.reset()
+        break
+
+
 

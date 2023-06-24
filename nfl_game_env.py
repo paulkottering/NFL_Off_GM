@@ -45,6 +45,8 @@ class nfl_game(gym.Env):
 
     def step(self, action):
 
+        reward = 0
+
         # run plays
         if action == 0 or action == 1:
             yards_gained, retain_ball = run(action)
@@ -84,8 +86,7 @@ class nfl_game(gym.Env):
 
         if action == 5:
             self.time -= 7
-            yards_gained = punt(self.yard_line)
-            self.yard_line = np.clip(yards_gained+self.yard_line,0,100)
+            self.yard_line = punt(self.yard_line)
             retain_ball = False
 
         if action == 6:
@@ -95,25 +96,31 @@ class nfl_game(gym.Env):
             self.time -= 2
             if kick_success:
                 self.score_home += 3
+                reward = 0.3
                 self.yard_line = 75
             else:
                 self.yard_line = min(np.clip(self.yard_line-7,0,100),80)
 
-        if retain_ball and self.yard_line > 100:
+        if retain_ball and self.yard_line >= 100:
             self.score_home += 7
+            reward = 0.7
             retain_ball = False
+            self.yard_line = 75
 
         #check if loss of down due to 4 downs
         if retain_ball and self.down == 5:
             retain_ball = False
+            reward = -0.05
 
         # check if possession is
         if not retain_ball:
             start_yard_line, opp_change_in_score, time_taken = defensive_possession(self.yard_line, self.time)
+            #print('Defensive Posession = ', start_yard_line, opp_change_in_score, time_taken)
             self.yard_line = start_yard_line
             self.distance_to_go = 10
             self.down = 1
             self.score_away += opp_change_in_score
+            reward -= opp_change_in_score*0.1
             self.time -= time_taken
 
 
@@ -123,13 +130,14 @@ class nfl_game(gym.Env):
                 self.time = 1800
                 self.half = 2
             else:
+                print(self.score_home,self.score_away)
                 if self.score_home > self.score_away:
                     return self.construct_obs(), 1, True, {}
                 elif self.score_home == self.score_away:
                     return self.construct_obs(), -0.5, True, {}
                 else:
                     return self.construct_obs(), -1, True, {}
-        return self.construct_obs(), 0, False, {}
+        return self.construct_obs(), reward, False, {}
 
     def construct_obs(self):
         # obs = {"yard_line": self.yard_line,

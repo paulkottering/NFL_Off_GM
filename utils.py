@@ -12,7 +12,7 @@ def run(action):
 
         if retain_ball:
             intervals = np.array([-10, 0, 5, 10, 15, 20, 30, 50, 100])
-            probabilities = np.array([0.1, 0.6, 0.2, 0.05, 0.02, 0.01, 0.01, 0.01])
+            probabilities = np.array([0.3, 0.4, 0.2, 0.05, 0.02, 0.01, 0.01, 0.01])
             yards_gained = sample_custom_distribution(intervals, probabilities)
             return yards_gained, retain_ball
         else:
@@ -78,11 +78,10 @@ def throw(action):
             return 0, retain_ball
 
 def punt(yard_line):
-    mu = 45  # Average punt distance in the NFL
-    sigma = 10  # Standard deviation, representing variability in punt distance
-    yards_gained = np.clip(int(np.random.normal(mu, sigma)), 0, 100)
-    yards_gained = min(yards_gained, 95-yard_line)
-    return yards_gained
+    mu = 65  # Average punt distance in the NFL
+    sigma = 5  # Standard deviation, representing variability in punt distance
+    new_yard_line = np.clip(yard_line + int(np.random.normal(mu, sigma)), 0, 95)
+    return new_yard_line
 
 def field_goal(distance):
     if distance < 35:
@@ -97,10 +96,14 @@ def field_goal(distance):
 
 
 def defensive_possession(yard_line, time):
+    # Scaling the probabilities with respect to the yard_line
+    x = (100-yard_line)
+    prob_td = 0.8 - x*0.016 + 0.00009*x**2
+    prob_fg = 0.1 + x*0.008 - 0.00008*x**2
+    prob_none = 1 - (prob_td + prob_fg)
 
-    prob = np.random.choice([1, 2, 3], p=[0.25, 0.15,0.6])
-    time_taken = int(norm.rvs(loc=150,scale=60))
-
+    prob = np.random.choice([1, 2, 3], p=[prob_td, prob_fg, prob_none])
+    time_taken = int(norm.rvs(loc=150, scale=60))
 
     if prob == 1 and time_taken < time:
         opp_change_in_score = 7
@@ -110,20 +113,17 @@ def defensive_possession(yard_line, time):
     if prob == 2 and time_taken < time:
         opp_change_in_score = 3
         start_yard_line = 25
-
         return start_yard_line, opp_change_in_score, time_taken
 
     else:
         opp_change_in_score = 0
-
         a = 4
         b = 8
-
         new_min, new_max = 0, yard_line
         sample = beta.rvs(a, b)
         start_yard_line = sample * (new_max - new_min) + new_min
 
-        return start_yard_line, opp_change_in_score, time_taken
+        return int(start_yard_line), opp_change_in_score, time_taken
 
 
 def sample_custom_distribution(intervals, probabilities):
