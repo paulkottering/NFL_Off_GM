@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from stable_baselines import PPO2, DQN
+from stable_baselines import PPO2, DQN, ACER
 
 labels = ['Short Run','Long Run','Short Throw','Medium Throw','Long Throw','Punt','Field Goal Attempt']
-variables = ['yard_line', 'distance_to_go', 'down', 'time', 'half', 'score_home', 'score_away']
+variables = ['yard_line', 'distance_to_go', 'down', 'time', 'score_difference']
 
-variable_index = 1
+variable_index = 0
 variable_param = variables[variable_index]
-values = np.linspace(1, 20, 20)
-fixed_params = [10, 1, 1000, 1, 0, 0]
+values = np.linspace(0, 100, 100)
+fixed_params = [90, 4, 100, 0]
 
-model = DQN.load("../dqn_nfl")
+model = PPO2.load("../PPO_nfl_optuna_def")
 
 action_probabilities = []
 
