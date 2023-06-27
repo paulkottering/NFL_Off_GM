@@ -13,8 +13,8 @@ The agent is trained using the Proximal Policy Optimization (PPO) algorithm. The
 
 The game environment comes in two forms (they can be found in the 'envs' folder):
 
-NFLGame: This environment has a simple reward structure, with rewards equal to 1 for winning and -1 for losing.
-NFLGame_shaped: This environment has a shaped reward structure, which includes additional rewards and penalties for other game situations.
+- NFLGame: This environment has a simple reward structure, with rewards equal to 1 for winning and -1 for losing.
+- NFLGame_shaped: This environment has a shaped reward structure, which includes additional rewards and penalties for other game situations.
 
 ## Installation
 
