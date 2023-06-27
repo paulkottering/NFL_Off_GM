@@ -80,7 +80,7 @@ def create_and_plot_distribution():
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.92)
-    plt.savefig('distributions')
+    plt.savefig('plotting/distributions')
 
 # Call the function
 create_and_plot_distribution()

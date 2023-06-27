@@ -24,9 +24,10 @@ for i in range(total_timesteps // eval_timesteps):
     mean_rewards.append(mean_reward)
     std_rewards.append(std_reward)
     print('Mean = ',mean_reward)
+    print('Eval Number = ',i)
 
 # Save the agent
-model.save(model_name)
+model.save('models/'+model_name)
 
 
 # Plotting mean rewards with std as error bars
@@ -34,4 +35,4 @@ plt.errorbar(np.arange(len(mean_rewards)) * eval_timesteps, mean_rewards, yerr=s
 plt.title('Training progress')
 plt.xlabel('Timesteps')
 plt.ylabel('Mean Reward')
-plt.savefig('train_plot_'+ model_name + '.png')
+plt.savefig('plotting/train_plot_'+ model_name + '.png')
