@@ -29,12 +29,19 @@ class NFLGame(gym.Env):
         """
         This function resets the game to its initial state.
         """
-
-        self.time = 1000
-        self.down = 1
-        self.yard_line = 25
-        self.distance_to_go = 10
-        self.score_difference = 0
+        prob = np.random.rand()
+        if prob > 0:
+            self.time = 1000
+            self.down = 1
+            self.yard_line = 25
+            self.distance_to_go = 10
+            self.score_difference = 0
+        else:
+            self.time = np.random.randint(0,1000)
+            self.down = np.random.randint(1,4)
+            self.yard_line = np.random.randint(0,100)
+            self.distance_to_go = min(np.random.randint(0,20),100-self.yard_line)
+            self.score_difference = np.random.randint(-7,7)
 
         # Return the initial state of the game
         start = [self.yard_line, self.distance_to_go, self.down, self.time, self.score_difference]
@@ -57,7 +64,7 @@ class NFLGame(gym.Env):
 
                 if yards_gained > self.distance_to_go:
                     self.down = 1
-                    self.distance_to_go = 10
+                    self.distance_to_go = min(10, 100-self.yard_line)
                 else:
                     self.down += 1
                     self.distance_to_go -= yards_gained
@@ -79,7 +86,7 @@ class NFLGame(gym.Env):
 
                 if yards_gained > self.distance_to_go:
                     self.down = 1
-                    self.distance_to_go = 10
+                    self.distance_to_go = min(10, 100-self.yard_line)
                 else:
                     self.down += 1
                     self.distance_to_go -= yards_gained
@@ -121,11 +128,11 @@ class NFLGame(gym.Env):
         # End the game if time runs out
         if self.time < 0:
             if self.score_difference > 0:
-                return self.construct_obs(), 10, True, {}
+                return self.construct_obs(), 1, True, {}
             elif self.score_difference == 0:
-                return self.construct_obs(), 3, True, {}
+                return self.construct_obs(), 0, True, {}
             else:
-                return self.construct_obs(), -3, True, {}
+                return self.construct_obs(), -1, True, {}
 
         return self.construct_obs(), reward, False, {}
 

@@ -5,12 +5,12 @@ from stable_baselines import PPO2, DQN, ACER
 labels = ['Short Run','Long Run','Short Throw','Medium Throw','Long Throw','Punt','Field Goal Attempt']
 variables = ['yard_line', 'distance_to_go', 'down', 'time', 'score_difference']
 
-variable_index = 0
+variable_index = 1
 variable_param = variables[variable_index]
-values = np.linspace(0, 100, 100)
-fixed_params = [90, 4, 100, 0]
+values = np.linspace(0, 30, 30)
+fixed_params = [90, 4, 800, 0]
 
-model = PPO2.load("../PPO_nfl_optuna_def")
+model = PPO2.load("../PPO_nfl_shaped_2")
 
 action_probabilities = []
 

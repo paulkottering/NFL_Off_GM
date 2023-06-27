@@ -1,6 +1,6 @@
-from nfl_game_env import NFLGame
+from envs.nfl_game_env import NFLGame
 import optuna
-from stable_baselines import DQN, PPO2
+from stable_baselines import PPO2
 from stable_baselines.common.evaluation import evaluate_policy
 
 env = NFLGame()
