@@ -44,7 +44,7 @@ class NFLGame_shaped(gym.Env):
             self.score_difference = np.random.randint(-14, 14)
 
         # Return the initial state of the game
-        start = [self.yard_line, self.distance_to_go, self.down, self.time, self.score_difference]
+        start = np.array([self.yard_line, self.distance_to_go, self.down, self.time, self.score_difference])
         return start
 
     def step(self, action):
@@ -57,7 +57,7 @@ class NFLGame_shaped(gym.Env):
         # run plays
         if action == 0 or action == 1:
             if self.down == 4:
-                reward -= 0.2
+                reward -= 0.5
             yards_gained, retain_ball = run(action)
             # The below logic is applied if the ball is retained after the action
             if retain_ball:
@@ -75,7 +75,7 @@ class NFLGame_shaped(gym.Env):
         # pass plays
         if action == 2 or action == 3 or action == 4:
             if self.down == 4:
-                reward -= 0.2
+                reward -= 0.5
             yards_gained, retain_ball = throw(action)
             if retain_ball:
                 self.yard_line = np.clip(yards_gained+self.yard_line,0,100)
@@ -100,9 +100,9 @@ class NFLGame_shaped(gym.Env):
         # punt action
         if action == 5:
             if self.down != 4:
-                reward -= 0.2
+                reward -= 0.5
             elif self.down == 4:
-                reward += 0.2
+                reward += 0.5
             self.time -= 7
             self.yard_line = punt(self.yard_line)
             retain_ball = False
@@ -110,19 +110,19 @@ class NFLGame_shaped(gym.Env):
         # field goal action
         if action == 6:
             if self.down != 4:
-                reward -= 0.2
+                reward -= 0.5
             elif self.down == 4:
-                reward += 0.2
+                reward += 0.5
             distance = 100 - self.yard_line + 17
             kick_success = field_goal(distance)
             retain_ball = False
             self.time -= 2
             if kick_success:
-                reward += 3
+                reward += 5
                 self.score_difference += 3
                 self.yard_line = 75
             else:
-                reward -= 0.2
+                # reward -= 0.5
                 self.yard_line = min(np.clip(self.yard_line-7,0,100),80)
 
         if retain_ball and self.yard_line >= 100:
@@ -159,5 +159,5 @@ class NFLGame_shaped(gym.Env):
         This function constructs the observations of the current game state.
         """
 
-        obs = [self.yard_line, self.distance_to_go, self.down, self.time, self.score_difference]
+        obs = np.array([self.yard_line, self.distance_to_go, self.down, self.time, self.score_difference])
         return obs

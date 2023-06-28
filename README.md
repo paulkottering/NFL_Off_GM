@@ -2,6 +2,9 @@
 
 This project trains a reinforcement learning model to perform plays in a simulated NFL game environment. The goal of the agent is to win the game. 
 
+![NFL Field](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/AmFBfield.svg/1200px-AmFBfield.svg.png)
+
+
 ## Description
 
 The agent is trained using the Proximal Policy Optimization (PPO) algorithm. The project includes code for:
@@ -15,6 +18,9 @@ The game environment comes in two forms (they can be found in the 'envs' folder)
 
 - NFLGame: This environment has a simple reward structure, with rewards equal to 1 for winning and -1 for losing.
 - NFLGame_shaped: This environment has a shaped reward structure, which includes additional rewards and penalties for other game situations.
+
+![Reinforcement Learning Diagram](https://www.mathworks.com/help/reinforcement-learning/ug/agent_diagram.png)
+
 
 ## Installation
 
